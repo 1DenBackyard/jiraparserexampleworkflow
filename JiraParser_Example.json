@@ -1,0 +1,146 @@
+{
+  "name": "My workflow 6",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=http://<ваш ip : порт>/rest/api/2/search?jql=&maxResults=1000",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        0
+      ],
+      "id": "b24cfcdf-115e-41df-99ad-7ad92e7b7326",
+      "name": "Jira",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "5Zv38Pnu5WB5zwHm",
+          "name": "Unnamed credential 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let rows = [];\n\nfor (const item of items) {\n  if (!item.json || !Array.isArray(item.json.issues)) continue;\n  for (const issue of item.json.issues) {\n    let id = issue.id ?? '';\n    let key = issue.key ?? '';\n    let desc = issue.fields?.description ?? '';\n    let creator = issue.fields?.creator?.name ?? '';\n    rows.push([id, key, desc, creator].join(','));\n  }\n}\n\nreturn [{ json: { text: rows.join('\\n\\n') } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "1f2740e5-205e-45ec-804e-33a86411da19",
+      "name": "Jira JSON в TEXT"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "text"
+            },
+            {
+              "fieldToAggregate": "text1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        544,
+        0
+      ],
+      "id": "9b7cfe4f-8d10-485d-8a34-b9d296fea264",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        0
+      ],
+      "id": "3be44b9c-fde1-46c9-b981-4ac54b34e424",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "51c13a73-979f-48c8-860d-461400871a44",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Jira": {
+      "main": [
+        [
+          {
+            "node": "Jira JSON в TEXT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira JSON в TEXT": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Jira",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "05b4f74b-2717-485d-881e-3b3d6bb0fe77",
+  "meta": {
+    "instanceId": "2fb6d6937ccadb316de9c51a68bcb5f387bf7e2ba20626b9d48bc783d6d9008c"
+  },
+  "id": "qL1wB3utcppAMWCP",
+  "tags": []
+}
